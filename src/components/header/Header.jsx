@@ -20,6 +20,7 @@ import {
   set_active_user,
   remove_active_user,
 } from "../../redux/slice/authSlice";
+import ShowOnLogin, { ShowOnLogout } from "../hiddenLink/hiddenLink";
 const navigation = [
   { name: "Admin", to: "/admin", current: true },
   { name: "Home", to: "/", current: false },
@@ -29,9 +30,6 @@ const navigation = [
     to: "/cart",
     current: false,
   },
-  { name: "Login", to: "/login", current: false },
-  { name: "Register", to: "/register", current: false },
-  { name: "My Orders", to: "/order-history", current: false },
 ];
 
 function classNames(...classes) {
@@ -59,33 +57,37 @@ export default function Header() {
   };
   // Monito Currently Signin User
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // const uid = user.uid;
-        if (user.displayName === null) {
-          const u1 = user.email.substring(0, user.email.indexOf("@"));
-          const uName = u1.charAt(0).toUpperCase() + u1.slice(1);
-          setUsername(uName);
-        } else {
-          setUsername(user.displayName);
-          dispatch(remove_active_user());
-        }
-        dispatch(
-          set_active_user({
-            email: user.email,
-            userName: user.displayName ? user.displayName : userName,
-            userID: user.uid,
-          })
-        );
+    onAuthStateChanged(
+      auth,
+      (user) => {
+        if (user) {
+          // const uid = user.uid;
+          if (user.displayName === null) {
+            const u1 = user.email.substring(0, user.email.indexOf("@"));
+            const uName = u1.charAt(0).toUpperCase() + u1.slice(1);
+            setUsername(uName);
+          } else {
+            setUsername(user.displayName);
+            dispatch(() => remove_active_user());
+          }
+          dispatch(
+            set_active_user({
+              email: user.email,
+              userName: user.displayName ? user.displayName : userName,
+              userID: user.uid,
+            })
+          );
 
-        // ...
-      } else {
-        setUsername("");
-        // User is signed out
-        // ...
-      }
-    });
-  },);
+          // ...
+        } else {
+          setUsername("");
+          // User is signed out
+          // ...
+        }
+      },
+      [dispatch, userName]
+    );
+  });
 
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -143,17 +145,55 @@ export default function Header() {
                         {item.name}
                       </NavLink>
                     ))}
-                    <NavLink
-                      style={({ isActive }) =>
-                        isActive ? activeStyle : undefined
-                      }
-                      to="/"
-                      end
-                      onClick={logoutUser}
-                      className='text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium "'
-                    >
-                      Logout
-                    </NavLink>
+                    <ShowOnLogin>
+                      <NavLink
+                        style={({ isActive }) =>
+                          isActive ? activeStyle : undefined
+                        }
+                        to="/home"
+                        end
+                        onClick={logoutUser}
+                        className='text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium "'
+                      >
+                        Logout
+                      </NavLink>
+                    </ShowOnLogin>
+                    <ShowOnLogout>
+                      <NavLink
+                        style={({ isActive }) =>
+                          isActive ? activeStyle : undefined
+                        }
+                        to="/login"
+                        end
+                        className='text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium "'
+                      >
+                        Login
+                      </NavLink>
+                    </ShowOnLogout>
+                    <ShowOnLogin>
+                      <NavLink
+                        style={({ isActive }) =>
+                          isActive ? activeStyle : undefined
+                        }
+                        to="/order-history"
+                        end
+                        className='text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium "'
+                      >
+                        My Orders
+                      </NavLink>
+                    </ShowOnLogin>
+                    {/* <ShowOnLogout>
+                      <NavLink
+                        style={({ isActive }) =>
+                          isActive ? activeStyle : undefined
+                        }
+                        to="/register"
+                        end
+                        className='text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium "'
+                      >
+                        Register
+                      </NavLink>
+                    </ShowOnLogout> */}
                   </div>
                 </div>
               </div>
@@ -168,13 +208,15 @@ export default function Header() {
                     <p>0</p>
                   </div>
                 </button>
-                <a
-                  href="http://"
-                  className="text-white flex items-center justify-between gap-3 text-[10px] sm:text-[15px]"
-                >
-                  <FaUserCircle size={16} />
-                  Hi, {userName}
-                </a>
+                <ShowOnLogin>
+                  <a
+                    href="http://"
+                    className="text-[#fffa5b] flex items-center justify-between gap-3 text-[10px] sm:text-[15px]"
+                  >
+                    <FaUserCircle size={16} />
+                    Hi, {userName}
+                  </a>
+                </ShowOnLogin>
                 {/* Profile dropdown */}
                 {/* <Menu as="div" className="relative ml-3">
                   <div>
